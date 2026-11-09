@@ -1,0 +1,90 @@
+name: is021_q1
+document: >
+  Consecutive pages of ONE student's Information Security exam script,
+  covering Question 1. Read them as one continuous document.
+
+input:
+  pages: "1-5"
+  dpi: 200
+
+item:
+  label: sub-question            # what one returned object represents
+  id_field: sub_q
+  expected_ids: [a, b, c, d, e, f, g, h, i, j, k, l, m, n, o]
+
+fields:
+  - name: sub_q
+    type: str
+    description: Sub-question label as printed, lowercase, no brackets.
+  - name: question_text
+    type: str
+    description: The printed statement, verbatim.
+  - name: student_answer
+    type: str
+    description: The student's handwritten answer, verbatim.
+  - name: awarded_mark
+    type: float
+    description: Red-pen mark for this answer box. X means 0. Use -1 if none visible. Maximum mark per question is 2.
+  - name: mark_evidence
+    type: str
+    description: The literal mark symbol seen, e.g. X, 2, 1, tick, none.
+  - name: has_math
+    type: bool
+    description: True if the answer contains any mathematical notation.
+  - name: has_diagram
+    type: bool
+    description: True if the answer contains a drawing, arrow-mapping, or figure.
+  - name: legibility
+    type: str
+    description: "One of: clean, partial, poor."
+
+task_rules: |
+  ## Marks
+  The examiner marked in RED pen. Take ONLY the mark inside or beside
+  the answer box. IGNORE circled numbers in the far-left margin; those
+  are running totals. Never infer a mark from whether the answer looks right.
+
+checks:
+  - type: range
+    field: awarded_mark
+    min: 0
+    max: 2
+    allowed_extra: [-1]
+  - type: total
+    field: awarded_mark
+    max: 30
+    ignore: [-1]
+
+table:
+  formats: [csv, xlsx]
+  doc_id_regex: "([^_]+)$"         # last part after "_": paper_001 -> 001
+  constants:
+    exam_id: IS_021_FINAL
+    big_q: Q1
+    max_mark: 2
+    big_q_total: 30
+  columns:
+    response_id: "{doc_id}_{exam_id}_{big_q}{sub_q}"
+    exam_id: "{exam_id}"
+    student_id: "{doc_id}"
+    big_q: "{big_q}"
+    sub_q: "{sub_q}"
+    question_id: "{exam_id}_{big_q}{sub_q}"
+    question_type: independent
+    flow_group: ""
+    depends_on: ""
+    max_mark: "{max_mark}"
+    big_q_total: "{big_q_total}"
+    has_math: "{has_math}"
+    has_diagram: "{has_diagram}"
+    question_text: "{question_text}"
+    rubric: ""
+    model_answer: ""
+    student_answer: "{student_answer}"
+    awarded_mark: "{awarded_mark}"
+    grade_evidence: "{mark_evidence}"
+    legibility: "{legibility}"
+    transcription_verified: "no"
+    needs_review: "{needs_review}"
+    review_note: "{review_note}"
+    source_pdf: "{source}"
